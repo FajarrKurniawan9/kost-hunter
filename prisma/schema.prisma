@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SEEKER
+  OWNER
+  ADMIN
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  role      UserRole @default(SEEKER)
+  kosts     Kost[]
+  reviews   Review[]
+  createdAt DateTime @default(now())
+}
+
+model Kost {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String   @db.Text
+  address     String
+  city        String
+  price       Int
+  type        String
+  // 'putra', 'putri', 'campur'
+  photos      String   @db.Text
+  // JSON array of photo URLs
+  ownerId     Int
+  owner       User     @relation(fields: [ownerId], references: [id])
+  reviews     Review[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  // 1-5
+  comment   String   @db.Text
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  kostId    Int
+  kost      Kost     @relation(fields: [kostId], references: [id])
+  createdAt DateTime @default(now())
+}
